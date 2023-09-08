@@ -1,0 +1,21 @@
+version: "3.9"
+
+networks:
+  api:
+    driver: bridge
+
+services:
+  api-postgres:
+    image: api-db
+    container_name: api-postgres
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    ports:
+      - 5050:5432
+    networks:
+      - api
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    
