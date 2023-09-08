@@ -38,7 +38,7 @@ def obter_emails(): # método para listar todos os e-mails cadastrados
     except (Exception, psycopg2.DatabaseError) as error:
         print("Erro ao listar os e-mails cadastrados!\n", error)
         cursor.close()
-        return 1 
+        return 1
     
 # (GET)
 @app.route('/emails/<int:id>',methods=['GET']) # aqui é definido qual URL que vai chamar esse médodo
@@ -53,23 +53,45 @@ def obter_email(id): # método para listar um email específico
     except (Exception, psycopg2.DatabaseError) as error:
         print("Erro ao listar o e-mail cadastrado!\n", error)
         cursor.close()
-        return 1 
+        return 1
 
 # (PUT)
 @app.route('/emails/<int:id>',methods=['PUT']) # aqui é definido qual URL que vai chamar esse médodo
 def editar_email(id): # método para atualizar um email específico
-    email_alterado = request.get_json() # recebe o novo valor do email enviado pelo usuário
-    for indice,email in enumerate(emails): # percorre todos os emails e enumera eles
-        if email.get('id') == id: # verifica se existe algum e-mail com o ID passado por parâmetro
-            emails[indice].update(email_alterado) # realiza a edição do email
-            return jsonify(emails[indice]) # retorna os dados em formato JSON
+    novo_email = request.form.get('email') # recebe o valor do email a ser alterado pelo usuário (testado via postman em form-data)
+    conexao = conectadb()
+    cursor = conexao.cursor()
+    try:
+        sql = 'UPDATE tabela SET email = \'{}\' WHERE id = \'{}\''.format(novo_email,id)
+        cursor.execute(sql)
+        conexao.commit()
+        newsql = f'SELECT * FROM tabela;'
+        cursor.execute(newsql)
+        dados = cursor.fetchall()
+        return(jsonify(dados))
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Erro ao atualizar o e-mail!\n", error)
+        cursor.close()
+        return 1
 
 # (POST)
 @app.route('/emails',methods=['POST']) # aqui é definido qual URL que vai chamar esse médodo
 def cadastrar_email(): # método para cadastrar um novo email
-    novo_email = request.get_json() # recebe o valor do email a ser cadastrado pelo usuário
-    emails.append(novo_email)
-    return jsonify(emails) # retorna os dados em formato JSON
+    novo_email = request.form.get('email') # recebe o valor do email a ser cadastrado pelo usuário (testado via postman em form-data)
+    conexao = conectadb()
+    cursor = conexao.cursor()
+    try:
+        sql = 'INSERT INTO tabela VALUES (DEFAULT,\'{}\')'.format(novo_email)
+        cursor.execute(sql)
+        conexao.commit()
+        newsql = f'SELECT * FROM tabela;'
+        cursor.execute(newsql)
+        dados = cursor.fetchall()
+        return(jsonify(dados))
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Erro ao cadastrar novo e-mail!\n", error)
+        cursor.close()
+        return 1
 
 # (DELETE)
 @app.route('/emails/<int:id>',methods=['DELETE']) # aqui é definido qual URL que vai chamar esse médodo
@@ -87,6 +109,6 @@ def deletar_email(id): # método para deletar um email específico
     except (Exception, psycopg2.DatabaseError) as error:
         print("Erro ao deletar e-mail!\n", error)
         cursor.close()
-        return 1 
+        return 1
 
 app.run(port=4000,host='localhost',debug=True) # define em qual porta ele vai rodar e em qual host (localhost)
