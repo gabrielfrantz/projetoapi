@@ -15,7 +15,7 @@ from flask import Flask, jsonify, request # importa o Flask (servidor), importa 
 app = Flask(__name__) # criando uma aplicação com o nome de Flask
 
 def conectadb(): #conexao com o banco de dados postgres
-    conexao = psycopg2.connect(host="localhost",
+    conexao = psycopg2.connect(host="host.docker.internal",
                                database="cadastros",
                                user="postgres",
                                password="postgres",
